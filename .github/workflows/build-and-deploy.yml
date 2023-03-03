@@ -1,10 +1,15 @@
 name: Build and Deploy to Azure Env
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+
+env:
+  AZURE_CONTAINER_REGISTRY: nicoledemo.azurecr.io
+  
 on:
   push:
     branches: [master]
   workflow_dispatch:
-  
+
+
 permissions:
       contents: read
 
@@ -26,13 +31,13 @@ jobs:
           # Container registry password
           password: ${{secrets.ACR_PASSWORD}}
           # Container registry server url
-          login-server: nicoledemo.azurecr.io
+          login-server: ${{env.AZURE_CONTAINER_REGISTRY}}
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
           push: true
           # tags: <registry server url>/<app name>:<git commit sha>
-          tags: nicoledemo.azurecr.io/hello-world-app:${{ github.sha}}
+          tags: ${{env.AZURE_CONTAINER_REGISTRY}}/hello-world-app:${{ github.sha}}
           file: Dockerfile
 
   deployToAKS:
@@ -80,7 +85,7 @@ jobs:
         uses: danielr1996/envsubst-action@1.0.0
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
-          AZURE_CONTAINER_REGISTRY: nicoledemo.azurecr.io
+          AZURE_CONTAINER_REGISTRY: ${{AZURE_CONTAINER_REGISTRY}}
           CONTAINER_NAME: hello-world-app:${{ github.sha}}
         with:
           input: 
@@ -97,4 +102,4 @@ jobs:
             hello-world-deployment.yaml
             kubernetes/hello-world-service.yaml
           images: |
-            nicoledemo.azurecr.io/hello-world-app:${{ github.sha}}
+            ${{env.AZURE_CONTAINER_REGISTRY}}/hello-world-app:${{ github.sha}}
