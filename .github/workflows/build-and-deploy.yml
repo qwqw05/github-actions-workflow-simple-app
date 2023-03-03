@@ -27,6 +27,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
+          # tags: <registry server url>/<app name>:<git commit sha>
           tags: nicoledemo.azurecr.io/hello-world-app:${{ github.sha}}
           file: Dockerfile
 
