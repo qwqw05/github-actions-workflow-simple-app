@@ -1,0 +1,41 @@
+name: Build and Deploy to Azure Env
+run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+jobs:
+  buildImage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        
+      - name: Azure Container Registry Login
+        uses: Azure/docker-login@v1
+        with:
+          # Container registry username
+          username: ${{ACR_USERNAME}}
+          # Container registry password
+          password: ${{ACR_PASSWORD}}
+          # Container registry server url
+          login-server: nicoledemo.azurecr.io
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          tags: nicoledemo.azurecr.io/hello-world-app:${{ github.sha}}
+          file: Dockerfile
+
+  pushToACR:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hello World."
+
+  deployToAKS:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hello World."
